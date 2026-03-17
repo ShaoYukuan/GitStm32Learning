@@ -50,3 +50,19 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+#  Keil MDK/STM32 编译生成的垃圾文件
+*.axf
+*.hex
+*.lst
+*.dep
+*.obj
+*.bak
+*.uvguix.*
+*.uvoptx
+*.uvprojx
+
+#  编译生成的中间文件
+*.o
+*.d
+*.elf
