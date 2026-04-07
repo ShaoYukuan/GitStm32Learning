@@ -7,7 +7,7 @@
 #include "KEY.h"
 
 uint16_t ADValue;
-uint8_t i;
+uint16_t Duty;
 
 int main(void)
 {
@@ -17,6 +17,7 @@ int main(void)
 	PWM_Init();
 
 	OLED_ShowString(2,1,"ADVlaue:");
+	OLED_ShowString(3,1,"Duty:  %");
 	OLED_ShowString(1,3,"ShaoYukuan");
 	//printf("Num=%d\r\n",666);
 	
@@ -25,13 +26,21 @@ int main(void)
 		
 		ADValue = AD_GetValue();
 		OLED_ShowNum(2,9,ADValue,4);
-		Delay(i);
+		OLED_ShowNum(3,6,Duty,2);
 		
-		if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) == RESET)  // 按下（接地）
+		Duty = (uint32_t)ADValue * 1000 / 4096;
+		PWM_SetCompare1(Duty);
+		
+		if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_2) == RESET)  // 按下（接地）
 		{
-			Delay_ms(20);  // 简单消抖，可先不加
+			Delay_ms(20);  // 简单消抖
 			printf("Key Pressed\r\n");
-			while(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) == RESET); // 等待松手
+			while(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_2) == RESET); // 等待松手
+		}
+		if(ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC) == RESET)
+		{
+			Delay_ms(800);
+			printf("AD_Value=%d\r\n",ADValue);
 		}
 
 	}

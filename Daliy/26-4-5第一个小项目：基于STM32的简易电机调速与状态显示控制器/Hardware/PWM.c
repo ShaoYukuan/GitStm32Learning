@@ -1,5 +1,9 @@
 #include "stm32f10x.h"                  // Device header
 #include "Delay.h"
+#include "Serial.h"
+
+uint16_t CCR;
+
 void PWM_Init(void)
 {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE);
@@ -17,8 +21,8 @@ void PWM_Init(void)
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;//选择始终分频
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;//计数器模式
-	TIM_TimeBaseStructure.TIM_Period = 100-1;//周期，ARR自动重装器的值
-	TIM_TimeBaseStructure.TIM_Prescaler = 720-1;//PSC预分频器的值
+	TIM_TimeBaseStructure.TIM_Period = 1000-1;//周期，ARR自动重装器的值
+	TIM_TimeBaseStructure.TIM_Prescaler = 72-1;//PSC预分频器的值
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;//重复计数器的值（高级计数器采用）
 	TIM_TimeBaseInit(TIM2,&TIM_TimeBaseStructure);//配置时基单元
 	
@@ -33,21 +37,17 @@ void PWM_Init(void)
 	TIM_Cmd(TIM2,ENABLE);
 }
 
-void PWM_SetCompare1(uint16_t COmpare)
+void PWM_SetDutyByADC(uint16_t ADValue)
 {
-	TIM_SetCompare1(TIM2,COmpare);//实时改变CCR
+    CCR = (uint32_t)ADValue * 1000 / 4096;  // 假设 ARR=999
 }
 
-void Delay(uint8_t i)
+
+void PWM_SetCompare1(uint16_t CCR)
 {
-	for(i = 0;i <= 100; i++)
-		{
-			PWM_SetCompare1(i);//设置CCR的值
-			Delay_ms(10);
-		}
-		for(i = 0;i <= 100; i++)
-		{
-			PWM_SetCompare1(100-i);
-			Delay_ms(10);
-		}
+	TIM_SetCompare1(TIM2,CCR);//实时改变占空比
+	uint16_t duty_percent = (CCR * 100) / 1000;
+	printf("Duty = %d%%\r\n", duty_percent);
 }
+
+
