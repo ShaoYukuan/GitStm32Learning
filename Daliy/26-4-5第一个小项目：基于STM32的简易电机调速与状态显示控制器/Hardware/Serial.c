@@ -37,7 +37,7 @@ void Serial_SendByte(uint8_t Byte)
 void Serial_SendString(char*String)
 {
 	uint8_t i;
-	for (i =0;String[i] != '0';i++)
+	for (i =0;String[i] != '\0';i++)
 	{
 		Serial_SendByte(String[i]);
 	}

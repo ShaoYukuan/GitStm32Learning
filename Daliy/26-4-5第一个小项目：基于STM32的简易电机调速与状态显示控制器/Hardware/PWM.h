@@ -3,7 +3,7 @@
 
 void PWM_Init(void);
 void PWM_SetDutyByADC(uint16_t ADValue);
-void PWM_SetCompare1(uint16_t CCR);
+void PWM_SetCompare4(uint16_t CCR);
 
 
 #endif

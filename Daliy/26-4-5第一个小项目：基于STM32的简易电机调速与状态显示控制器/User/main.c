@@ -5,6 +5,7 @@
 #include "Serial.h"
 #include "PWM.h"
 #include "KEY.h"
+#include "Motor.h"
 
 uint16_t ADValue;
 uint16_t Duty;
@@ -14,11 +15,12 @@ int main(void)
 	OLED_Init();
 	AD_Init();
 	Serial_Init();
-	PWM_Init();
+	Motor_Init();
 
 	OLED_ShowString(2,1,"ADVlaue:");
 	OLED_ShowString(3,1,"Duty:  %");
 	OLED_ShowString(1,3,"ShaoYukuan");
+	
 	//printf("Num=%d\r\n",666);
 	
 	while(1)
@@ -28,8 +30,8 @@ int main(void)
 		OLED_ShowNum(2,9,ADValue,4);
 		OLED_ShowNum(3,6,Duty,2);
 		
-		Duty = (uint32_t)ADValue * 1000 / 4096;
-		PWM_SetCompare1(Duty);
+		Duty = (uint32_t)ADValue * 100 / 4096;
+		PWM_SetCompare4(Duty);
 		
 		if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_2) == RESET)  // 按下（接地）
 		{
@@ -37,7 +39,7 @@ int main(void)
 			printf("Key Pressed\r\n");
 			while(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_2) == RESET); // 等待松手
 		}
-		if(ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC) == RESET)
+		if(ADC_GetFlagStatus(ADC1,ADC_FLAG_EOC) == SET)
 		{
 			Delay_ms(800);
 			printf("AD_Value=%d\r\n",ADValue);
