@@ -2,6 +2,17 @@
 #include "PWM.h"
 #include "AD.h"
 
+//电机运转模式枚举
+
+typedef enum
+{
+	MOTOR_Stop = 0,
+	MOTOR_Forward = 1,
+	MOTOR_Backward = 2
+}Motor_Mode_t;
+
+static Motor_Mode_t Motor_CurrentMode = MOTOR_Stop;
+
 void Motor_Init(void)
 {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
@@ -13,26 +24,34 @@ void Motor_Init(void)
 	GPIO_Init(GPIOA,&GPIO_InitStructure);
 	
 	PWM_Init();
+
 }
 
-void Motor_Speed(uint16_t Duty)
+void Motor_Forward(uint16_t Duty)
 {
 	GPIO_SetBits(GPIOA,GPIO_Pin_6);
 	GPIO_ResetBits(GPIOA,GPIO_Pin_7);
 	TIM_SetCompare4(TIM2,Duty);
+	Motor_CurrentMode = MOTOR_Forward;
 }
-//void Motor_SetSpeed(int8_t Speed)
-//{
-//	if (Speed >= 0)							//如果设置正转的速度值
-//	{
-//		GPIO_SetBits(GPIOA, GPIO_Pin_4);	//PA4置高电平
-//		GPIO_ResetBits(GPIOA, GPIO_Pin_5);	//PA5置低电平，设置方向为正转
-//		PWM_SetCompare4(Speed);				//PWM设置为速度值
-//	}
-//	else									//否则，即设置反转的速度值
-//	{
-//		GPIO_ResetBits(GPIOA, GPIO_Pin_4);	//PA4置低电平
-//		GPIO_SetBits(GPIOA, GPIO_Pin_5);	//PA5置高电平，设置方向为反转
-//		PWM_SetCompare4(-Speed);			//PWM设置为负的速度值，因为此时速度值为负数，而PWM只能给正数
-//	}
-//}
+
+void Motor_Backward(uint16_t Duty)
+{
+	GPIO_ResetBits(GPIOA,GPIO_Pin_6);    // PA6 = 0
+	GPIO_SetBits(GPIOA,GPIO_Pin_7);      // PA7 = 1
+	TIM_SetCompare4(TIM2, Duty);
+	Motor_CurrentMode = MOTOR_Backward;
+}
+
+void Motor_Stop(void)
+{
+	GPIO_ResetBits(GPIOA,GPIO_Pin_6);
+	GPIO_ResetBits(GPIOA,GPIO_Pin_7);
+	TIM_SetCompare4(TIM2,0);
+	Motor_CurrentMode = MOTOR_Stop;
+}
+// 获取当前电机模式
+Motor_Mode_t Motor_GetMode(void)
+{
+	return Motor_CurrentMode;
+}
